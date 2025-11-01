@@ -57,6 +57,7 @@
 
         <!-- Formulario de Login -->
         <form method="POST" action="{% url 'login_view' %}">
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
             {% csrf_token %}
             
             <div class="mb-3">
