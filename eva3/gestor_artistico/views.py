@@ -50,6 +50,14 @@ def logout_view(request):
     messages.success(request, "Has cerrado sesión correctamente.")
     return redirect('login_view')
 
+def listar_proyectos(request):
+    my_projects = Proyecto.objects.filter(artista=request.user)
+    other_projects = Proyecto.objects.exclude(artista=request.user)
+    return render(request, 'gestor_artistico/listar.html', {
+        'my_projects': my_projects,
+        'other_projects': other_projects
+    })
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get('username')
