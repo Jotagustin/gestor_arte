@@ -77,9 +77,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Eva3',
-        'USER': 'django_user',
-        'PASSWORD': '2405',
-        'HOST': '127.0.0.1',
+        'USER': 'root',
+        'PASSWORD': 'cristianx2202',
+        'HOST': '',
         'PORT': '3306',
     }
 }

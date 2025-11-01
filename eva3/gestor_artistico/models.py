@@ -22,7 +22,7 @@ class Proyecto(models.Model):
     
 class Colaboracion(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
-    artista_col = models.ForeignKey(Artista, on_delete=models.CASCADE)
+    artista = models.ForeignKey(Artista, on_delete=models.CASCADE)
     valor = models.IntegerField(default=0)
     fecha_registro = models.DateField(auto_now_add=True)
 
