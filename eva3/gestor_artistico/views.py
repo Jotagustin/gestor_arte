@@ -31,7 +31,6 @@ def index_view(request):
 
 @login_required(login_url='login_view')
 def listar_view(request):
-    
     return render(request, 'listar.html')
 
 @login_required(login_url='login_view')
