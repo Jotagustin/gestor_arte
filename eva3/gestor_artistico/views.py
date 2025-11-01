@@ -31,6 +31,7 @@ def index_view(request):
 
 @login_required(login_url='login_view')
 def listar_view(request):
+<<<<<<< HEAD
     usuario = request.user
     artista, _ = Artista.objects.get_or_create(nombre=usuario.username)
 
@@ -44,6 +45,9 @@ def listar_view(request):
     return render(request, 'listar.html', context)
 
 
+=======
+    return render(request, 'listar.html')
+>>>>>>> 5752819e0226cc8d9786fa74fad6ce89debd13da
 
 @login_required(login_url='login_view')
 def agregar_view(request):
