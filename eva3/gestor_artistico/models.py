@@ -13,7 +13,9 @@ class Artista(models.Model):
 
 
 class Proyecto(models.Model):
-    artista = models.ForeignKey(Artista, on_delete=models.CASCADE)
+    # Hacemos el campo nullable temporalmente para permitir crear la migración
+    # sin pedir un valor por defecto para filas existentes.
+    artista = models.ForeignKey(Artista, on_delete=models.CASCADE, null=True, blank=True)
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField(max_length=300)
 
@@ -22,7 +24,7 @@ class Proyecto(models.Model):
     
 class Colaboracion(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
-    artista_col = models.ForeignKey(Artista, on_delete=models.CASCADE)
+    artista = models.ForeignKey(Artista, on_delete=models.CASCADE)
     valor = models.IntegerField(default=0)
     fecha_registro = models.DateField(auto_now_add=True)
 

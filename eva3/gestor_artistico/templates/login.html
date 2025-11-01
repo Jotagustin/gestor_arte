@@ -56,7 +56,7 @@
         <h2 class="login-title">Iniciar Sesión</h2>
 
         <!-- Formulario de Login -->
-        <form method="POST" action="{% url 'login' %}">
+        <form method="POST" action="{% url 'login_view' %}">
             {% csrf_token %}
             
             <div class="mb-3">
