@@ -1,16 +1,18 @@
 from django.shortcuts import render
 
-def index(request):
+def index_view(request):
     return render(request, 'index.html')
 
-def listar(request):
+def listar_view(request):
+    
     return render(request, 'listar.html')
 
-def agregar(request):
+def agregar_view(request):
     return render(request, 'agregar.html')
 
-def admin(request):
+def admin_view(request):
     return render(request, 'admin.html')
 
-def login(request):
+def login_view(request):
     return render(request, 'login.html')
+
