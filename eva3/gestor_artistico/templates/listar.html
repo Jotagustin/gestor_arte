@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lista de Proyectos de Arte</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#">Galería Creativa</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">Proyectos de Arte</h2>
+      <select id="filtro-propietario" class="form-select w-auto">
+        <option value="todos">Todos los proyectos</option>
+        <option value="propios">Mis proyectos</option>
+        <option value="otros">Proyectos de otros artistas</option>
+      </select>
+    </div>
+
+    <!-- Lista de proyectos -->
+    <div class="row" id="lista-proyectos">
+      <!-- Proyecto 1 -->
+      <div class="col-md-6 mb-4 proyecto" data-tipo="propios">
+        <div class="card shadow-sm">
+          <img src="https://picsum.photos/600/300?random=1" class="card-img-top" alt="Proyecto de arte">
+          <div class="card-body">
+            <h5 class="card-title">Luz y Sombra</h5>
+            <p class="card-text">Exploración del contraste lumínico en pintura digital.</p>
+            <button class="btn btn-primary btn-sm">Ver detalles</button>
+            <button class="btn btn-outline-success btn-sm">Permitir unirse</button>
+          </div>
+          <div class="card-footer">
+            <form class="d-flex">
+              <input type="text" class="form-control me-2" placeholder="Deja un comentario de apoyo...">
+              <button class="btn btn-secondary btn-sm">Comentar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proyecto 2 -->
+      <div class="col-md-6 mb-4 proyecto" data-tipo="otros">
+        <div class="card shadow-sm">
+          <img src="https://picsum.photos/600/300?random=2" class="card-img-top" alt="Proyecto de arte">
+          <div class="card-body">
+            <h5 class="card-title">Naturaleza Abstracta</h5>
+            <p class="card-text">Una colaboración abierta para reinterpretar paisajes naturales.</p>
+            <button class="btn btn-primary btn-sm">Ver detalles</button>
+            <button class="btn btn-outline-primary btn-sm">Unirse al proyecto</button>
+          </div>
+          <div class="card-footer">
+            <form class="d-flex">
+              <input type="text" class="form-control me-2" placeholder="Apoya con un comentario...">
+              <button class="btn btn-secondary btn-sm">Comentar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filtrar proyectos
+    const filtro = document.getElementById('filtro-propietario');
+    const proyectos = document.querySelectorAll('.proyecto');
+
+    filtro.addEventListener('change', () => {
+      const valor = filtro.value;
+      proyectos.forEach(p => {
+        if (valor === 'todos' || p.dataset.tipo === valor) {
+          p.style.display = 'block';
+        } else {
+          p.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
