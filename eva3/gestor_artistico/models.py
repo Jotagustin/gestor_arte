@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver    
 
 # Create your models here.
 
@@ -18,6 +19,7 @@ class Proyecto(models.Model):
     artista = models.ForeignKey(Artista, on_delete=models.CASCADE, null=True, blank=True)
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField(max_length=300)
+    imagen = models.ImageField(upload_to='proyectos/', null=True, blank=True)
 
     def __str__(self):
         return self.titulo
@@ -59,3 +61,7 @@ class Historial(models.Model):
     def __str__(self):
         return f"[{self.fecha_hora}] {self.usuario}: {self.accion} en {self.tabla_afectada}"
 
+@receiver(post_save, sender=User)
+def crear_perfil_usuario(sender, instance, created, **kwargs):
+    if created:
+        PerfilUsuario.objects.create(user=instance)

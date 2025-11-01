@@ -1,16 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from .models import Artista, Proyecto, Colaboracion, PerfilUsuario
 
 @login_required(login_url='login_view')
 def index_view(request):
-    """Dashboard / landing page for logged users.
-
-    Shows user's own projects and other projects and provides a modal to create new projects.
-    """
+    """Vista principal: muestra proyectos del usuario y de otros artistas según su rol."""
     def get_or_create_artista_for_user(user):
         nombre = user.username
         artista, _ = Artista.objects.get_or_create(nombre=nombre)
@@ -18,25 +14,41 @@ def index_view(request):
 
     user = request.user
     artista = get_or_create_artista_for_user(user)
+    perfil = PerfilUsuario.objects.get(user=user)
 
     my_projects = Proyecto.objects.filter(artista=artista)
     other_projects = Proyecto.objects.exclude(artista=artista)
 
     context = {
         'artista': artista,
+        'perfil': perfil,  
         'my_projects': my_projects,
         'other_projects': other_projects,
     }
     return render(request, 'index.html', context)
 
+
+
 @login_required(login_url='login_view')
 def listar_view(request):
-    
-    return render(request, 'listar.html')
+    usuario = request.user
+    artista, _ = Artista.objects.get_or_create(nombre=usuario.username)
+
+    my_projects = Proyecto.objects.filter(artista=artista)
+    other_projects = Proyecto.objects.exclude(artista=artista)
+
+    context = {
+        'my_projects': my_projects,
+        'other_projects': other_projects,
+    }
+    return render(request, 'listar.html', context)
+
+
 
 @login_required(login_url='login_view')
 def agregar_view(request):
     return render(request, 'agregar.html')
+
 
 @login_required(login_url='login_view')
 def admin_view(request):
@@ -45,18 +57,10 @@ def admin_view(request):
 
 @login_required(login_url='login_view')
 def logout_view(request):
-    """Cerrar sesión y redirigir al login."""
     logout(request)
     messages.success(request, "Has cerrado sesión correctamente.")
     return redirect('login_view')
 
-def listar_proyectos(request):
-    my_projects = Proyecto.objects.filter(artista=request.user)
-    other_projects = Proyecto.objects.exclude(artista=request.user)
-    return render(request, 'gestor_artistico/listar.html', {
-        'my_projects': my_projects,
-        'other_projects': other_projects
-    })
 
 def login_view(request):
     if request.method == "POST":
@@ -79,18 +83,36 @@ def login_view(request):
 
 @login_required(login_url='login_view')
 def crear_proyecto(request):
+    perfil = PerfilUsuario.objects.get(user=request.user)
+    
+    # Solo los artistas pueden crear proyectos
+    if perfil.rol != PerfilUsuario.Rol.ARTISTA:
+        messages.error(request, 'Solo los artistas pueden crear proyectos.')
+        return redirect('listar')
+
     if request.method == 'POST':
         titulo = request.POST.get('titulo')
         descripcion = request.POST.get('descripcion')
+        imagen = request.FILES.get('imagen')
+
         if not titulo:
             messages.error(request, 'El título es obligatorio.')
             return redirect('listar')
 
         nombre = request.user.username
-        artista = Artista.objects.get_or_create(nombre=nombre)[0]
-        Proyecto.objects.create(artista=artista, titulo=titulo, descripcion=descripcion or '')
+        artista, _ = Artista.objects.get_or_create(nombre=nombre)
+
+        Proyecto.objects.create(
+            artista=artista,
+            titulo=titulo,
+            descripcion=descripcion or '',
+            imagen=imagen
+        )
+
         messages.success(request, 'Proyecto creado correctamente.')
+
     return redirect('listar')
+
 
 
 @login_required(login_url='login_view')
@@ -133,4 +155,3 @@ def agregar_colaborador(request, proyecto_id):
         Colaboracion.objects.get_or_create(proyecto=proyecto, artista=artista_obj)
         messages.success(request, f'Artista {nombre_artista} agregado como colaborador.')
     return redirect('listar')
-

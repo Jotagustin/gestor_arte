@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,16 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lista de Proyectos de Arte</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .proyecto img {
+      display: block;
+      max-width: 100%;
+      max-height: 250px;
+      width: auto;
+      height: auto;
+      margin: 0 auto;
+      object-fit: contain;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      padding: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .proyecto img {
+        max-height: 180px;
+      }
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
+
 <body class="bg-light">
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="#">Galería Creativa</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <div class="container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="{% url 'index_view' %}">Galería Creativa</a>
+      <div class="d-flex align-items-center">
+        <span class="text-white me-3 small">Usuario: {{ request.user.username }} ({{ perfil.rol }})</span>
+        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
+      </div>
     </div>
   </nav>
 
@@ -25,65 +54,94 @@
       <select id="filtro-propietario" class="form-select w-auto">
         <option value="todos">Todos los proyectos</option>
         <option value="propios">Mis proyectos</option>
-        <option value="otros">Proyectos de otros artistas</option>
+        <option value="otros">De otros artistas</option>
       </select>
     </div>
 
     <!-- Lista de proyectos -->
     <div class="row" id="lista-proyectos">
-      <!-- Proyecto 1 -->
+
+      <!-- PROYECTOS PROPIOS -->
+      {% for p in my_projects %}
       <div class="col-md-6 mb-4 proyecto" data-tipo="propios">
         <div class="card shadow-sm">
-          <img src="https://picsum.photos/600/300?random=1" class="card-img-top" alt="Proyecto de arte">
-          <div class="card-body">
-            <h5 class="card-title">Luz y Sombra</h5>
-            <p class="card-text">Exploración del contraste lumínico en pintura digital.</p>
-            <button class="btn btn-primary btn-sm">Ver detalles</button>
-            <button class="btn btn-outline-success btn-sm">Permitir unirse</button>
-          </div>
-          <div class="card-footer">
-            <form class="d-flex">
-              <input type="text" class="form-control me-2" placeholder="Deja un comentario de apoyo...">
-              <button class="btn btn-secondary btn-sm">Comentar</button>
-            </form>
+          {% if p.imagen %}
+            <img src="{{ p.imagen.url }}" alt="{{ p.titulo }}">
+          {% else %}
+            <img src="{% static 'img/no-image.png' %}" alt="Sin imagen">
+          {% endif %}
+          <div class="card-body text-center">
+            <h5 class="card-title fw-bold">{{ p.titulo }}</h5>
+            <p class="card-text text-muted">{{ p.descripcion }}</p>
+
+            <!-- Botones solo si el usuario es Artista o Admin -->
+            {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
+              <a href="{% url 'editar_proyecto' p.id %}" class="btn btn-primary btn-sm">Editar</a>
+              <a href="{% url 'eliminar_proyecto' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+            {% endif %}
           </div>
         </div>
       </div>
+      {% empty %}
+        <p>No tienes proyectos aún.</p>
+      {% endfor %}
 
-      <!-- Proyecto 2 -->
+      <!-- PROYECTOS DE OTROS ARTISTAS -->
+      {% for p in other_projects %}
       <div class="col-md-6 mb-4 proyecto" data-tipo="otros">
         <div class="card shadow-sm">
-          <img src="https://picsum.photos/600/300?random=2" class="card-img-top" alt="Proyecto de arte">
-          <div class="card-body">
-            <h5 class="card-title">Naturaleza Abstracta</h5>
-            <p class="card-text">Una colaboración abierta para reinterpretar paisajes naturales.</p>
-            <button class="btn btn-primary btn-sm">Ver detalles</button>
-            <button class="btn btn-outline-primary btn-sm">Unirse al proyecto</button>
-          </div>
-          <div class="card-footer">
-            <form class="d-flex">
-              <input type="text" class="form-control me-2" placeholder="Apoya con un comentario...">
-              <button class="btn btn-secondary btn-sm">Comentar</button>
-            </form>
+          {% if p.imagen %}
+            <img src="{{ p.imagen.url }}" alt="{{ p.titulo }}">
+          {% else %}
+            <img src="{% static 'img/no-image.png' %}" alt="Sin imagen">
+          {% endif %}
+          <div class="card-body text-center">
+            <h5 class="card-title fw-bold">{{ p.titulo }}</h5>
+            <p class="card-text text-muted">{{ p.descripcion }}</p>
+            <p class="small text-muted">Artista: {{ p.artista.nombre }}</p>
+
+            <!-- Ver detalles (visible para todos) -->
+            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal{{ p.id }}">Ver detalles</button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="modal{{ p.id }}" tabindex="-1" aria-labelledby="modalLabel{{ p.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel{{ p.id }}">{{ p.titulo }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    {% if p.imagen %}
+                      <img src="{{ p.imagen.url }}" class="img-fluid rounded mb-3" alt="{{ p.titulo }}">
+                    {% endif %}
+                    <p>{{ p.descripcion }}</p>
+                    <p class="small text-muted">Artista: {{ p.artista.nombre }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
+      {% empty %}
+        <p>No hay proyectos de otros artistas.</p>
+      {% endfor %}
     </div>
   </div>
 
+  <!-- Filtro dinámico -->
   <script>
-    // Filtrar proyectos
     const filtro = document.getElementById('filtro-propietario');
     const proyectos = document.querySelectorAll('.proyecto');
-
     filtro.addEventListener('change', () => {
       const valor = filtro.value;
       proyectos.forEach(p => {
-        if (valor === 'todos' || p.dataset.tipo === valor) {
-          p.style.display = 'block';
-        } else {
-          p.style.display = 'none';
-        }
+        p.style.display = (valor === 'todos' || p.dataset.tipo === valor) ? 'block' : 'none';
       });
     });
   </script>
