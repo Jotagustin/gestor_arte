@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db.models.signals import post_save
-from django.dispatch import receiver    
+from django.dispatch import receiver
 
 
 class Artista(models.Model):
@@ -20,7 +20,8 @@ class Proyecto(models.Model):
 
     def __str__(self):
         return self.titulo
-    
+
+
 class Colaboracion(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
     artista = models.ForeignKey(Artista, on_delete=models.CASCADE)
@@ -29,7 +30,7 @@ class Colaboracion(models.Model):
 
     def __str__(self):
         return f"{self.proyecto.titulo} - {self.artista.nombre}"
-    
+
 
 class PerfilUsuario(models.Model):
 
@@ -39,24 +40,22 @@ class PerfilUsuario(models.Model):
         GESTOR = 'Gestor'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.ARTISTA)
 
-    rol = models.CharField(
-        max_length=20,
-        choices=Rol.choices,
-        default=Rol.ARTISTA
-    )
+    def __str__(self):
+        return f"{self.user.username} ({self.rol})"
 
 
 class Historial(models.Model):
-
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    accion = models.CharField(max_length=50)  
+    accion = models.CharField(max_length=50)
     tabla_afectada = models.CharField(max_length=50)
     registro_afectado_id = models.IntegerField(null=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"[{self.fecha_hora}] {self.usuario}: {self.accion} en {self.tabla_afectada}"
+
 
 @receiver(post_save, sender=User)
 def crear_perfil_usuario(sender, instance, created, **kwargs):
