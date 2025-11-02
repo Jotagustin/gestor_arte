@@ -20,17 +20,8 @@
       background-color: #f8f9fa;
       padding: 10px;
     }
-
-    @media (max-width: 768px) {
-      .proyecto img {
-        max-height: 180px;
-      }
-    }
-
-    .card {
-      border: none;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
+    @media (max-width: 768px) { .proyecto img { max-height: 180px; } }
+    .card { border: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
   </style>
 </head>
 
@@ -40,55 +31,47 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="{% url 'index_view' %}">Galería Creativa</a>
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'index_view' %}" class="btn btn-outline-light btn-sm">Volver</a>
         <span class="text-white me-3 small">Usuario: {{ request.user.username }} ({{ perfil.rol }})</span>
         <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
       </div>
     </div>
   </nav>
 
-  <!-- Contenedor Principal -->
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">Proyectos de Arte</h2>
-      <select id="filtro-propietario" class="form-select w-auto">
-        <option value="todos">Todos los proyectos</option>
-        <option value="propios">Mis proyectos</option>
-        <option value="otros">De otros artistas</option>
-      </select>
     </div>
 
-    <!-- Lista de proyectos -->
+    <!-- 🔍 FILTROS DE BÚSQUEDA -->
+    <form method="get" class="row g-2 mb-4 align-items-end">
+      <div class="col-md-3">
+        <input type="text" name="titulo" value="{{ request.GET.titulo }}" class="form-control" placeholder="Buscar por título">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="artista" value="{{ request.GET.artista }}" class="form-control" placeholder="Buscar por artista">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="descripcion" value="{{ request.GET.descripcion }}" class="form-control" placeholder="Buscar por descripción">
+      </div>
+      <div class="col-md-2">
+        <select id="filtro-propietario" name="tipo" class="form-select">
+          <option value="todos" {% if request.GET.tipo == "todos" or not request.GET.tipo %}selected{% endif %}>Todos</option>
+          <option value="propios" {% if request.GET.tipo == "propios" %}selected{% endif %}>Mis proyectos</option>
+          <option value="otros" {% if request.GET.tipo == "otros" %}selected{% endif %}>De otros artistas</option>
+        </select>
+      </div>
+      <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+
+    <!-- 🔸 LISTA DE PROYECTOS -->
     <div class="row" id="lista-proyectos">
 
-      <!-- PROYECTOS PROPIOS -->
-      {% for p in my_projects %}
-      <div class="col-md-6 mb-4 proyecto" data-tipo="propios">
-        <div class="card shadow-sm">
-          {% if p.imagen %}
-            <img src="{{ p.imagen.url }}" alt="{{ p.titulo }}">
-          {% else %}
-            <img src="{% static 'img/no-image.png' %}" alt="Sin imagen">
-          {% endif %}
-          <div class="card-body text-center">
-            <h5 class="card-title fw-bold">{{ p.titulo }}</h5>
-            <p class="card-text text-muted">{{ p.descripcion }}</p>
-
-            <!-- Botones solo si el usuario es Artista o Admin -->
-            {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
-              <a href="{% url 'editar_proyecto' p.id %}" class="btn btn-primary btn-sm">Editar</a>
-              <a href="{% url 'eliminar_proyecto' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      {% empty %}
-        <p>No tienes proyectos aún.</p>
-      {% endfor %}
-
-      <!-- PROYECTOS DE OTROS ARTISTAS -->
-      {% for p in other_projects %}
-      <div class="col-md-6 mb-4 proyecto" data-tipo="otros">
+      {% for p in proyectos %}
+      <div class="col-md-6 mb-4 proyecto">
         <div class="card shadow-sm">
           {% if p.imagen %}
             <img src="{{ p.imagen.url }}" alt="{{ p.titulo }}">
@@ -100,51 +83,20 @@
             <p class="card-text text-muted">{{ p.descripcion }}</p>
             <p class="small text-muted">Artista: {{ p.artista.nombre }}</p>
 
-            <!-- Ver detalles (visible para todos) -->
-            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal{{ p.id }}">Ver detalles</button>
-
-            <!-- Modal -->
-            <div class="modal fade" id="modal{{ p.id }}" tabindex="-1" aria-labelledby="modalLabel{{ p.id }}" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel{{ p.id }}">{{ p.titulo }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                  </div>
-                  <div class="modal-body">
-                    {% if p.imagen %}
-                      <img src="{{ p.imagen.url }}" class="img-fluid rounded mb-3" alt="{{ p.titulo }}">
-                    {% endif %}
-                    <p>{{ p.descripcion }}</p>
-                    <p class="small text-muted">Artista: {{ p.artista.nombre }}</p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
+              {% if p.artista.nombre == request.user.username %}
+                <a href="{% url 'editar_proyecto' p.id %}" class="btn btn-primary btn-sm">Editar</a>
+                <a href="{% url 'eliminar_proyecto' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+              {% endif %}
+            {% endif %}
           </div>
         </div>
       </div>
       {% empty %}
-        <p>No hay proyectos de otros artistas.</p>
+        <p class="text-muted">No se encontraron proyectos con los filtros aplicados.</p>
       {% endfor %}
     </div>
   </div>
-
-  <!-- Filtro dinámico -->
-  <script>
-    const filtro = document.getElementById('filtro-propietario');
-    const proyectos = document.querySelectorAll('.proyecto');
-    filtro.addEventListener('change', () => {
-      const valor = filtro.value;
-      proyectos.forEach(p => {
-        p.style.display = (valor === 'todos' || p.dataset.tipo === valor) ? 'block' : 'none';
-      });
-    });
-  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

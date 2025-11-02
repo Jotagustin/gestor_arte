@@ -31,18 +31,43 @@ def index_view(request):
     return render(request, 'index.html', context)
 
 
-
 @login_required(login_url='login_view')
 def listar_view(request):
     usuario = request.user
+    perfil = PerfilUsuario.objects.get(user=usuario)
     artista, _ = Artista.objects.get_or_create(nombre=usuario.username)
 
+    # Base de datos inicial
     my_projects = Proyecto.objects.filter(artista=artista)
     other_projects = Proyecto.objects.exclude(artista=artista)
+
+    # Filtros desde el formulario GET
+    titulo = request.GET.get('titulo', '')
+    artista_nombre = request.GET.get('artista', '')
+    descripcion = request.GET.get('descripcion', '')
+    tipo = request.GET.get('tipo', 'todos')
+
+    # Unificamos los proyectos para aplicar filtros
+    proyectos = Proyecto.objects.all()
+
+    if titulo:
+        proyectos = proyectos.filter(titulo__icontains=titulo)
+    if artista_nombre:
+        proyectos = proyectos.filter(artista__nombre__icontains=artista_nombre)
+    if descripcion:
+        proyectos = proyectos.filter(descripcion__icontains=descripcion)
+
+    # Filtro por tipo (propios / otros / todos)
+    if tipo == 'propios':
+        proyectos = proyectos.filter(artista=artista)
+    elif tipo == 'otros':
+        proyectos = proyectos.exclude(artista=artista)
 
     context = {
         'my_projects': my_projects,
         'other_projects': other_projects,
+        'proyectos': proyectos,
+        'perfil': perfil,
     }
     return render(request, 'listar.html', context)
 
@@ -88,7 +113,6 @@ def login_view(request):
 def crear_proyecto(request):
     perfil = PerfilUsuario.objects.get(user=request.user)
     
-    # Solo los artistas pueden crear proyectos
     if perfil.rol != PerfilUsuario.Rol.ARTISTA:
         messages.error(request, 'Solo los artistas pueden crear proyectos.')
         return redirect('listar')
