@@ -6,7 +6,10 @@ from .models import Artista, Proyecto, Colaboracion, PerfilUsuario
 
 @login_required(login_url='login_view')
 def index_view(request):
-    """Vista principal: muestra proyectos del usuario y de otros artistas según su rol."""
+    """Dashboard / landingpy page for logged users.
+
+    Shows user's own projects and other projects and provides a modal to create new projects.
+    """
     def get_or_create_artista_for_user(user):
         nombre = user.username
         artista, _ = Artista.objects.get_or_create(nombre=nombre)
@@ -31,7 +34,6 @@ def index_view(request):
 
 @login_required(login_url='login_view')
 def listar_view(request):
-<<<<<<< HEAD
     usuario = request.user
     artista, _ = Artista.objects.get_or_create(nombre=usuario.username)
 
@@ -45,9 +47,6 @@ def listar_view(request):
     return render(request, 'listar.html', context)
 
 
-=======
-    return render(request, 'listar.html')
->>>>>>> 5752819e0226cc8d9786fa74fad6ce89debd13da
 
 @login_required(login_url='login_view')
 def agregar_view(request):

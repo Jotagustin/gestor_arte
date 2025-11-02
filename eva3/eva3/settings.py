@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import pymysql
+pymysql.install_as_MySQLdb()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,10 +79,9 @@ WSGI_APPLICATION = 'eva3.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Eva3',
+        'NAME': 'eva3',
         'USER': 'root',
-        'PASSWORD': 'cristianx2202',
-        'HOST': '',
+        'PASSWORD': 'ema123',
         'PORT': '3306',
     }
 }
