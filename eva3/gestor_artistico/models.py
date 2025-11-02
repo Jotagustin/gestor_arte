@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver    
 
-# Create your models here.
 
 class Artista(models.Model):
     nombre = models.CharField(max_length=100)
@@ -14,8 +13,6 @@ class Artista(models.Model):
 
 
 class Proyecto(models.Model):
-    # Hacemos el campo nullable temporalmente para permitir crear la migración
-    # sin pedir un valor por defecto para filas existentes.
     artista = models.ForeignKey(Artista, on_delete=models.CASCADE, null=True, blank=True)
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField(max_length=300)

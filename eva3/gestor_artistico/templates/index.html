@@ -19,7 +19,11 @@
         Rol: <strong>{{ perfil.rol }}</strong>
       </p>
     </div>
-    <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Cerrar sesión</a>
+
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'listar' %}" class="btn btn-outline-dark">Ver proyectos</a>
+      <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Cerrar sesión</a>
+    </div>
   </div>
 
   <div class="row">
@@ -34,17 +38,40 @@
               <div class="text-muted">{{ p.descripcion }}</div>
             </div>
 
-            <!-- Controles solo para artistas y admin -->
-            {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
-            <div>
-              <a href="{% url 'editar_proyecto' p.id %}" class="btn btn-sm btn-primary">Editar</a>
-              <a href="{% url 'eliminar_proyecto' p.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#contribModal{{ p.id }}">
-                Añadir colaborador
-              </button>
+            <div class="d-flex gap-2">
+              <!-- Nuevo botón para ver proyecto -->
+              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewModalOwn{{ p.id }}">Ver</button>
+
+              {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
+                <a href="{% url 'editar_proyecto' p.id %}" class="btn btn-sm btn-primary">Editar</a>
+                <a href="{% url 'eliminar_proyecto' p.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#contribModal{{ p.id }}">
+                  Añadir colaborador
+                </button>
+              {% endif %}
             </div>
-            {% endif %}
           </li>
+
+          <!-- Modal ver proyecto propio -->
+          <div class="modal fade" id="viewModalOwn{{ p.id }}" tabindex="-1" aria-labelledby="viewLabelOwn{{ p.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="viewLabelOwn{{ p.id }}">{{ p.titulo }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  {% if p.imagen %}
+                    <img src="{{ p.imagen.url }}" alt="{{ p.titulo }}" class="img-fluid rounded mb-3">
+                  {% endif %}
+                  <p>{{ p.descripcion }}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Modal añadir colaborador -->
           <div class="modal fade" id="contribModal{{ p.id }}" tabindex="-1" aria-labelledby="contribLabel{{ p.id }}" aria-hidden="true">
@@ -75,19 +102,13 @@
         {% endfor %}
       </ul>
 
-      <!-- Botón crear nuevo proyecto -->
       {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
       <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#createProjectModal">
         Crear nuevo proyecto
       </button>
       {% endif %}
-
-      <div class="text-center mt-3">
-        <a href="{% url 'listar' %}" class="btn btn-outline-dark">Ver más proyectos</a>
-      </div>
     </div>
 
-    <!-- PROYECTOS DE OTROS ARTISTAS -->
     <div class="col-md-6">
       <h3>Proyectos de otros artistas</h3>
       <ul class="list-group">
@@ -101,7 +122,6 @@
 
             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ p.id }}">Ver</button>
 
-            <!-- Modal de vista -->
             <div class="modal fade" id="viewModal{{ p.id }}" tabindex="-1" aria-labelledby="viewLabel{{ p.id }}" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">
@@ -127,14 +147,9 @@
           <li class="list-group-item">No hay proyectos de otros artistas.</li>
         {% endfor %}
       </ul>
-
-      <div class="text-center mt-3">
-        <a href="{% url 'listar' %}" class="btn btn-outline-dark">Ver más proyectos</a>
-      </div>
     </div>
   </div>
 
-  <!-- MODAL CREAR PROYECTO -->
   {% if perfil.rol == 'Artista' or perfil.rol == 'Admin' %}
   <div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectLabel" aria-hidden="true">
     <div class="modal-dialog">
