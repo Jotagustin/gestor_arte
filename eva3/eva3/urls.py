@@ -17,6 +17,9 @@ urlpatterns = [
     path('auditoria/', views.auditoria_view, name='auditoria_view'),
     path('admin/crear-usuario/', views.crear_usuario, name='crear_usuario'),
     path('diagnostico/', views.diagnostico_sesion, name='diagnostico_sesion'),
+    path('proyecto/<int:proyecto_id>/sugerencia/', views.enviar_sugerencia, name='enviar_sugerencia'),
+    path('proyecto/<int:proyecto_id>/sugerencias/', views.ver_sugerencias, name='ver_sugerencias'),
+    path('sugerencia/<int:sugerencia_id>/leida/', views.marcar_sugerencia_leida, name='marcar_sugerencia_leida'),
 
 ]
 

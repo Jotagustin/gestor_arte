@@ -57,6 +57,21 @@ class Historial(models.Model):
         return f"[{self.fecha_hora}] {self.usuario}: {self.accion} en {self.tabla_afectada}"
 
 
+class Sugerencia(models.Model):
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
+    colaborador = models.ForeignKey(Artista, on_delete=models.CASCADE)
+    titulo = models.CharField(max_length=150)
+    descripcion = models.TextField(max_length=500)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.titulo} - {self.colaborador.nombre} para {self.proyecto.titulo}"
+
+
 @receiver(post_save, sender=User)
 def crear_perfil_usuario(sender, instance, created, **kwargs):
     if created:

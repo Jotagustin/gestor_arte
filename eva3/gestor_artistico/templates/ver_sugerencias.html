@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias - {{ proyecto.titulo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Sugerencias para "{{ proyecto.titulo }}"</h1>
+        <div>
+            <a href="{% url 'index_view' %}" class="btn btn-outline-primary">Volver al panel</a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Información del proyecto</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Título:</strong> {{ proyecto.titulo }}</p>
+                    <p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
+                    <p><strong>Fecha de creación:</strong> {{ proyecto.fecha_creacion }}</p>
+                    {% if proyecto.imagen %}
+                        <p><strong>Imagen:</strong></p>
+                        <img src="{{ proyecto.imagen.url }}" alt="{{ proyecto.titulo }}" class="img-fluid" style="max-height: 200px;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3>Sugerencias recibidas</h3>
+            
+            {% if sugerencias %}
+                <div class="row">
+                    {% for sugerencia in sugerencias %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card {% if not sugerencia.leida %}border-info{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong>{{ sugerencia.titulo }}</strong>
+                                        {% if not sugerencia.leida %}
+                                            <span class="badge bg-info ms-2">Nueva</span>
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ sugerencia.fecha_creacion }}</small>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ sugerencia.descripcion }}</p>
+                                    <p class="text-muted mb-0">
+                                        <small>Enviado por: <strong>{{ sugerencia.colaborador.nombre }}</strong></small>
+                                    </p>
+                                </div>
+                                {% if not sugerencia.leida %}
+                                <div class="card-footer">
+                                    <form method="post" action="{% url 'marcar_sugerencia_leida' sugerencia.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Marcar como leída</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <h5>No hay sugerencias</h5>
+                    <p class="mb-0">Aún no has recibido sugerencias para este proyecto.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
